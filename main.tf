@@ -1,3 +1,21 @@
+locals {
+  lambda_zip_filename  = "${var.lambda_function_zip_filename}${var.lambda_function_version}.zip"
+  lambda_zip_file_path = abspath(local.lambda_zip_filename)
+  lambda_url           = "${var.lambda_function_zip_base_url}${var.lambda_function_version}/${var.lambda_function_zip_filename}${var.lambda_function_version}.zip"
+}
+
+resource "null_resource" "lambda_code" {
+  triggers = {
+    url : var.lambda_function_zip_base_url
+    filename : var.lambda_function_zip_filename
+    version : var.lambda_function_version
+  }
+
+  provisioner "local-exec" {
+    command = "curl -sSL -o ${local.lambda_zip_filename} ${local.lambda_url}"
+  }
+}
+
 resource "aws_iam_role" "this" {
   name = var.name
 
@@ -60,14 +78,12 @@ resource "aws_cloudwatch_log_group" "this" {
 }
 
 resource "aws_lambda_function" "this" {
-  filename      = "${path.module}/lambda.zip"
+  filename      = local.lambda_zip_file_path
   function_name = var.name
   role          = aws_iam_role.this.arn
   handler       = "index.handler"
 
   timeout = "15"
-
-  source_code_hash = filebase64sha256("${path.module}/lambda.zip")
 
   runtime = "nodejs12.x"
 
