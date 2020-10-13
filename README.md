@@ -5,7 +5,13 @@
 ## Overview
 
 Deploy a lambda function triggered by Spot instance interruption warning event.
-Creates custom CloudWatch metrics
+Creates custom CloudWatch metrics indicating when the interruption event occured.
+
+Creates a metric called `SpotTerminationEvent` with the following dimensions:
+  * instance-type
+  * ASG, AZ, instance-id, instance-type
+  * ASG
+  * AZ
 
 ## Examples
 
