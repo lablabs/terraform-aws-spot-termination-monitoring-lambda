@@ -20,6 +20,10 @@ exports.handler = async (event) => {
   var instanceLaunchTime;
   var instanceAZ;
   var instanceASG;
+  var instancePrivateIP;
+  var instanceSubnet;
+  var instanceVPC;
+  var instanceUptime;
 
   var params = {
     InstanceIds: [
@@ -35,13 +39,21 @@ exports.handler = async (event) => {
       instanceType = data.Reservations[0].Instances[0].InstanceType;
       instanceLaunchTime = data.Reservations[0].Instances[0].LaunchTime;
       instanceAZ = data.Reservations[0].Instances[0].Placement.AvailabilityZone;
-
+      instancePrivateIP = data.Reservations[0].Instances[0].PrivateIpAddress;
+      instanceSubnet = data.Reservations[0].Instances[0].SubnetId;
+      instanceVPC = data.Reservations[0].Instances[0].VpcId;
+      instanceUptime = (new Date() - new Date(instanceLaunchTime)) / 1000;
     }
   }).promise();
 
   console.log("Instance type:", instanceType);
-  console.log("Instance launch time:", instanceLaunchTime);
   console.log("Instance AZ:", instanceAZ);
+  console.log("Instance VPC: ", instanceVPC);
+  console.log("Instance subnet: ", instanceSubnet);
+  console.log("Instance private IP: ", instancePrivateIP);
+  console.log("Instance launch time:", instanceLaunchTime);
+  console.log("Instance uptime: ", instanceUptime, "seconds");
+
   await autoscaling.describeAutoScalingInstances(params, function (err, data) {
     if (err) {
       console.log(err, err.stack);
@@ -74,7 +86,19 @@ exports.handler = async (event) => {
           {
             Name: 'instance-type',
             Value: instanceType,
-          }
+          },
+          {
+            Name: 'private-ip',
+            Value: instancePrivateIP,
+          },
+          {
+            Name: 'VPC',
+            Value: instanceVPC,
+          },
+          {
+            Name: 'subnet',
+            Value: instanceSubnet,
+          },
         ],
         Timestamp: new Date(),
         Value: '1',
@@ -114,6 +138,66 @@ exports.handler = async (event) => {
         ],
         Timestamp: new Date(),
         Value: '1',
+      },
+      {
+        MetricName: 'SpotTerminationEvent',
+
+        Dimensions: [
+          {
+            Name: 'VPC',
+            Value: instanceVPC,
+          }
+        ],
+        Timestamp: new Date(),
+        Value: '1',
+      },
+      {
+        MetricName: 'SpotTerminationEvent',
+
+        Dimensions: [
+          {
+            Name: 'subnet',
+            Value: instanceSubnet,
+          }
+        ],
+        Timestamp: new Date(),
+        Value: '1',
+      },
+      {
+        MetricName: 'SpotUptimeSeconds',
+
+        Dimensions: [
+          {
+            Name: 'instance-id',
+            Value: id,
+          },
+          {
+            Name: 'ASG',
+            Value: instanceASG,
+          },
+          {
+            Name: 'AZ',
+            Value: instanceAZ,
+          },
+          {
+            Name: 'instance-type',
+            Value: instanceType,
+          },
+          {
+            Name: 'private-ip',
+            Value: instancePrivateIP,
+          },
+          {
+            Name: 'VPC',
+            Value: instanceVPC,
+          },
+          {
+            Name: 'subnet',
+            Value: instanceSubnet,
+          },
+        ],
+        Timestamp: new Date(),
+        Value: instanceUptime,
       },
 
     ],

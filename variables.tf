@@ -11,7 +11,7 @@ variable "lambda_function_zip_filename" {
 variable "lambda_function_version" {
   type        = string
   description = "Version of lambda function. See https://github.com/lablabs/terraform-aws-spot-termination-monitoring-lambda/releases"
-  default     = "0.0.1"
+  default     = "0.0.2"
 }
 
 variable "lambda_function_zip_base_url" {
