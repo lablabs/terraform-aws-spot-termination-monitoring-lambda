@@ -9,9 +9,14 @@ Creates custom CloudWatch metrics indicating when the interruption event occured
 
 Creates a metric called `SpotTerminationEvent` with the following dimensions:
   * instance-type
-  * ASG, AZ, instance-id, instance-type
+  * ASG, AZ, VPC, instance-id, instance-type, private-ip, subnet
   * ASG
   * AZ
+  * VPC
+  * subnet
+
+Creates a metric called `SpotUptimeSeconds` with the following dimensions:
+  * ASG, AZ, VPC, instance-id, instance-type, private-ip, subnet
 
 ## Examples
 
